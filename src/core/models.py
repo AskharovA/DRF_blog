@@ -3,6 +3,7 @@ from django.utils import timezone
 from ckeditor_uploader.fields import RichTextUploadingField
 from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
+from pytils.translit import slugify
 
 
 class Post(models.Model):
@@ -10,13 +11,20 @@ class Post(models.Model):
     slug = models.SlugField(unique=True)
     description = RichTextUploadingField()
     content = RichTextUploadingField()
-    image = models.ImageField()
-    created_at = models.DateField(default=timezone.now)
+    image = models.ImageField(blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     tags = TaggableManager()
 
     def __str__(self):
         return self.title
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        if not self.pk:
+            self.slug = slugify(self.title)
+        super().save(force_insert, force_update, using, update_fields)
 
 
 class Comment(models.Model):
