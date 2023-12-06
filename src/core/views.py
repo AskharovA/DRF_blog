@@ -24,6 +24,9 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberSetPagination
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
 
 class TagDetailView(generics.ListAPIView):
     serializer_class = PostSerializer
