@@ -1,12 +1,13 @@
 from rest_framework import viewsets, permissions, pagination, generics, filters
-from .serializers import (PostSerializer, TagSerializer, ContactSerializer,
-                          RegisterSerializer, UserSerializer, CommentSerializer)
 from .models import Post, Comment
 from rest_framework.response import Response
 from taggit.models import Tag
 from rest_framework.views import APIView
 from django.core.mail import send_mail
 from django.conf import settings
+
+from .serializers import (PostSerializer,TagSerializer, ContactSerializer,
+                          RegisterSerializer, UserSerializer, CommentSerializer)
 
 
 class PageNumberSetPagination(pagination.PageNumberPagination):
@@ -21,7 +22,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     lookup_field = 'slug'
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = PageNumberSetPagination
 
     def perform_create(self, serializer):

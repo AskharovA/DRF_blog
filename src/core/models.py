@@ -4,6 +4,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
 from pytils.translit import slugify
+import pathlib
 
 
 class Post(models.Model):
@@ -25,6 +26,13 @@ class Post(models.Model):
         if not self.pk:
             self.slug = slugify(self.title)
         super().save(force_insert, force_update, using, update_fields)
+
+    def delete(self, using=None, keep_parents=False):
+        if self.image:
+            file = pathlib.Path(self.image.path)
+            if file.is_file() and file.exists():
+                file.unlink()
+        super().delete(using, keep_parents)
 
 
 class Comment(models.Model):

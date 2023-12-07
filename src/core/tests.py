@@ -45,7 +45,15 @@ class PostModelTest(TestCase):
 
 class URLTest(APITestCase):
     def test_url(self):
-        response = self.client.get("http://localhost:8000/api/posts/")
+        response = self.client.get("http://127.0.0.1:8000/api/posts/")
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+    def test_tags_url(self):
+        response = self.client.get(reverse("tags"))
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+    def test_aside_url(self):
+        response = self.client.get(reverse("aside_posts"))
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
 
@@ -61,8 +69,8 @@ class PostAPITest(APITestCase):
             content="Test Post Content",
             author=self.test_user,
         )
-        self.url = "http://localhost:8000/api/posts/"
-        self.post_url = f"http://localhost:8000/api/posts/{self.test_post.slug}/"
+        self.url = "http://127.0.0.1:8000/api/posts/"
+        self.post_url = f"http://127.0.0.1:8000/api/posts/{self.test_post.slug}/"
         token = self.get_token()
         self.api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
 
@@ -77,6 +85,14 @@ class PostAPITest(APITestCase):
         response = self.api_client.get(self.url)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEquals(response.data["count"], 1)
+
+    def test_post_detail(self):
+        response = self.api_client.get(self.post_url)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEquals(response.data["title"], self.test_post.title)
+        self.assertEquals(response.data["description"], self.test_post.description)
+        self.assertEquals(response.data["content"], self.test_post.content)
+        self.assertEquals(response.data["slug"], slugify(self.test_post.title))
 
     def test_post_create(self):
         test_post = {
@@ -104,6 +120,7 @@ class PostAPITest(APITestCase):
             "title": "UpdatedTestPostTitle"
         }
         response = self.api_client.patch(self.post_url, data, format="json")
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEquals(data["title"], response.data["title"])
 
     def test_delete_post(self):
